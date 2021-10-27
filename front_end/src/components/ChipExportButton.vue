@@ -10,7 +10,7 @@
         <v-dialog
             v-model="dialog"
             width="50vh"
-            height="100vh"
+            height="120vh"
             @click:outside="handleExportDialogOff()"
         >
             <v-card>
@@ -21,7 +21,7 @@
                 <v-container>
                     <v-radio-group v-model="templateSelection" mandatory>
                         <v-row>
-                            <v-col>
+                            <!-- <v-col> -->
                             <v-radio
                                 value="A"
                             >
@@ -35,7 +35,7 @@
                                     </v-img>
                                 </template>
                             </v-radio>
-                            <v-radio
+                            <!-- <v-radio
                                 value="C"
                             >
                                 <template v-slot:label>
@@ -47,9 +47,9 @@
                                     >
                                     </v-img>
                                 </template>
-                            </v-radio>
-                            </v-col>
-                            <v-col>
+                            </v-radio> -->
+                            <!-- </v-col> -->
+                            <!-- <v-col>
                             <v-radio
                                 value="B"
                             >
@@ -76,7 +76,7 @@
                                     </v-img>
                                 </template>
                             </v-radio>
-                            </v-col>
+                            </v-col> -->
                         </v-row>
                     </v-radio-group>
                 </v-container>
@@ -97,6 +97,18 @@
                         Cancel
                     </v-btn>
                 </v-card-actions>
+                <v-row align="center" justify="center">
+                    <v-alert
+                        type="error"
+                        v-model="alert"
+                    >
+                        <span v-for="(error, index) in errorMsg"
+                            :key=index
+                        >
+                            {{error}} <br>
+                        </span>
+                    </v-alert>
+                </v-row>
             </v-card>
         </v-dialog>
     </div>
@@ -130,6 +142,8 @@ export default {
         dialog: false
         ,templateSelection: ""
         ,painterro: null
+        ,alert: false
+        ,errorMsg: []
     }),
     computed: {
         databaseLocalHost() {
@@ -222,7 +236,29 @@ export default {
             return newFilename;
         },
 
+        // lengthCheck() {
+        //     if(this.templateSelection === "") {
+        //         this.alert = true;
+        //         this.errorMsg.push("Please select a template.");
+        //         return false;
+        //     }
+        //     return true;
+        // },
+        // checkError() {
+        //     this.alert = false;
+        //     this.errorMsg = [];
+        //     if(!this.lengthCheck()) {
+        //         console.log("Hello");
+        //         this.alert = true;
+        //         return true;
+        //     }
+        //     return false;
+        // },
+
         async handleExport() {
+            // if(this.checkError()) {
+            //     return;
+            // }
             this.$store.dispatch("changeTemplate", this.templateSelection);
             // console.log("Hello");
             // console.log(this.$root.$refs.PaintTool.rasterize());
@@ -230,14 +266,57 @@ export default {
             // let imageSrcs = this.$root.$refs.PaintTool.rasterize();
 
             // console.log(imageSrcs);
-            let newFilename = "";
-            newFilename = await this.uploadImageToFileSystem(this.chipFrontNewImageData, "chip_front.png");
-            console.log(newFilename);
-            this.$store.dispatch('changeChipFrontPaintImageUrl', newFilename);
+            this.$store.dispatch("changeLoading", true);
 
-            newFilename = await this.uploadImageToFileSystem(this.chipBackNewImageData, "chip_back.png");
-            console.log(newFilename);
-            this.$store.dispatch('changeChipBackPaintImageUrl', newFilename);
+            let chipFront = this.chipFrontUrl;
+            let chipBack = this.chipBackUrl;
+            console.log(this.chipFrontNewImageData);
+            console.log(this.chipBackNewImageData);
+            if(this.chipFrontNewImageData !== "") {
+                console.log("Front");
+                chipFront = await this.uploadImageToFileSystem(this.chipFrontNewImageData, "chip_front.png");
+                console.log(chipFront);
+                this.$store.dispatch('changeChipFrontPaintImageUrl', chipFront);
+            
+            }
+            if(this.chipBackNewImageData !== "") {
+                console.log("Back");
+                chipBack = await this.uploadImageToFileSystem(this.chipBackNewImageData, "chip_back.png");
+                console.log(chipBack);
+                this.$store.dispatch('changeChipBackPaintImageUrl', chipBack);
+                
+            }
+
+            let payload = {
+                template: this.templateSelection
+                ,front_url: chipFront
+                ,back_url: chipBack
+            };
+            let filepath = "";
+            let fileSize = [0, 0];
+
+            await this.axios.post("http://" + this.databaseLocalHost + "/createExport", payload)
+            .then(response=> {
+                console.log(response);
+                filepath = response["data"]["filepath"];
+                fileSize = response["data"]["filesize"];
+            }).catch(error => {
+                console.log(error);
+            });
+            this.$store.dispatch("changeLoading", false);
+
+            var filename = filepath.replace(/^.*[\\/]/, '');
+            //let image_path = "http://" + this.localHostName + "/chip_images/exported/" + filename;
+            let image_path = "http://" + this.databaseLocalHost + "/static/export/" + filename;
+            console.log(image_path)
+
+            payload = {
+                image: image_path
+                ,image_size: fileSize
+            };
+            this.$store.dispatch('changeShowFinalEdit', true);
+            this.$emit("show-painterro", payload);
+            this.dialog = false;
 
             // let payload = {
             //     template: this.templateSelection

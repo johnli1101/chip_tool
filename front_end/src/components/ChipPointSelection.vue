@@ -58,7 +58,7 @@
                                 style="z-index: 0;"
                             >
                             <l-image-overlay
-                                :url="getOverlayMapImage()"
+                                :url="overlayMapImage"
                                 :bounds="[[0, 0], instructionMapBounds]"
                             />
                             <l-marker
@@ -122,7 +122,9 @@
                     <v-spacer></v-spacer>
                     <v-select
                         :items="chipInstructionDropdown"
-
+                        item-text="text"
+                        item-value="value"
+                        v-model="dropdownDefault"
                         label="Instruction to Select"
                         outlined
                         @change="handleChangeDropdown"
@@ -135,6 +137,18 @@
                         Ok
                     </v-btn>
                 </v-card-actions>
+                <v-row align="center" justify="center">
+                    <v-alert
+                        type="error"
+                        v-model="alert"
+                    >
+                        <span v-for="(error, index) in errorMsg"
+                            :key=index
+                        >
+                            {{error}} <br>
+                        </span>
+                    </v-alert>
+                </v-row>
             </v-card>
         </v-dialog>
     </div>
@@ -180,7 +194,10 @@ export default {
         instructionMapBounds: [0, 0],
         currentIndex: 0,
         original_distances: [],
-        instruction_distances: []
+        instruction_distances: [],
+        dropdownDefault: 0,
+        alert: false,
+        errorMsg: [],
     }),
     watch: {
         currentIndex: function () {
@@ -245,18 +262,45 @@ export default {
             }
             return "";
         },
+        lengthCheck() {
+            for(let i = 0; i < this.markers.length; ++i) {
+                if(this.markers[i].length < 4 || this.instructionMarkers[i].length < 4) {
+                    console.log(this.markers[i].length);
+                    console.log(this.instructionMarkers[i].length);
+                    this.errorMsg.push(this.chipInstructionDropdown[i].text + " does not have enough markers.");
+                }
+            }
+            if(this.errorMsg.length > 0) {
+                return false;
+            } else {
+                return true;
+            }
+        },
+        checkError() {
+            this.alert = false;
+            this.errorMsg = [];
+            if(!this.lengthCheck()) {
+                console.log("Hello");
+                this.alert = true;
+                return true;
+            }
+            return false;
+        },
         calculateDistance(point1, point2) {
             return Math.pow(point2[0] - point1[0], 2) + Math.pow(point2[1] - point1[1], 2);
         },
         getOverlayMapImage() {
+            console.log(this.overlayMapImage);
             if(this.overlayMapImage !== "") {
                 // var filename_front = this.chipInstructionDropdown[this.currentIndex].value.replace(/^.*[\\/]/, '');
                 // let chip_image_path = "http://" + this.localHostName + "/chip_images/instructions/" + filename_front;
                 // console.log(chip_image_path);
                 // console.log(this.mapBounds);
                 // return chip_image_path;
-                console.log(this.chipInstructionDropdown);
-                return this.chipInstructionDropdown[this.currentIndex].value;
+                // console.log(this.chipInstructionDropdown);
+                // return this.chipInstructionDropdown[this.currentIndex].value;
+                console.log(this.overlayMapImage);
+                return this.overlayMapImage
             }
             return "";    
         },
@@ -433,11 +477,17 @@ export default {
             console.log(this.chipInstructionSizes[instructionIndex][1], this.chipInstructionSizes[instructionIndex][0]);
             this.instructionMapBounds = [this.chipInstructionSizes[instructionIndex][1], this.chipInstructionSizes[instructionIndex][0]];
             this.overlayMapImage = this.chipInstructionDropdown[instructionIndex].text;
+            this.dropdownDefault = event;
             console.log(this.markers);
             console.log(instructionIndex);
             console.log(this.chipInstructionSizes);
         },
         handleContinue() {
+            if(this.checkError()) {
+                console.log(this.errorMsg);
+                return;
+            }
+
             let pointJson = {
                 original: {
                     image: this.chipFrontUrl
@@ -528,6 +578,10 @@ export default {
         setUpPointSelection() {
             console.log(this.chipInstructionDropdown);
             console.log(this.markers);
+            this.dropdownDefault = this.chipInstructionDropdown[0].value;
+            this.instructionMapBounds = [this.chipInstructionSizes[0][1], this.chipInstructionSizes[0][0]];
+            this.overlayMapImage = this.chipInstructionDropdown[0].value;
+            console.log(this.overlayMapImage)
             for(let i = 0; i < this.chipInstructionDropdown.length; ++i) {
                 this.markers.push([]);
                 this.instructionMarkers.push([]);

@@ -34,6 +34,18 @@
                 >
                     Next
                 </v-btn>
+                <v-row align="center" justify="center">
+                    <v-alert
+                        type="error"
+                        v-model="alert"
+                    >
+                        <span v-for="(error, index) in errorMsg"
+                            :key=index
+                        >
+                            {{error}} <br>
+                        </span>
+                    </v-alert>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>

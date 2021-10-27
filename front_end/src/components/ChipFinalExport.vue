@@ -77,7 +77,7 @@ export default {
     },
     data: () => ({
         dialog: false
-        ,project_name: ""
+        ,project_name: "final_project"
     }),
     computed: {
         databaseLocalHost() {

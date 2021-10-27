@@ -3,7 +3,7 @@
   <div id="app">
     <div v-if="overlays">
       <div v-for="(image, index) in overlays" v-bind:key="index">
-        <img :src="image" alt="" :id="'id-overlay'+index"/>
+        <img :src="image" alt="" :id="'id-overlay'+index" crossorigin="anonymous"/>
       </div>
     </div>
 
@@ -127,11 +127,11 @@
           <v-divider
               vertical
           ></v-divider>
-          <v-btn @click="downloadImg(canvas)"><a id="download" download="image.png"></a> Download</v-btn>
+          <v-btn @click="downloadImg(canvas)"><a id="download" download="image.png"></a> Save</v-btn>
           <v-divider
               vertical
           ></v-divider>
-          <v-btn @click="rasterize()">Export</v-btn>
+          <!-- <v-btn @click="rasterize()">Export</v-btn> -->
         </v-btn-toggle>
         <v-divider></v-divider>
       </v-col>
@@ -250,16 +250,16 @@ export default {
       const options = {};
       var image = document.getElementsByClassName("lower-canvas")[0];
       const printCanvas = await html2canvas(image, options);
-      const link = document.createElement("a");
-      link.setAttribute("download", "Edited_Image.png");
-      link.setAttribute(
-          "href",
-          printCanvas
-              .toDataURL("image/png")
-              .replace("image/png", "image/octet-stream" ),
-      );
+      // const link = document.createElement("a");
+      // link.setAttribute("download", "Edited_Image.png");
+      // link.setAttribute(
+      //     "href",
+      //     printCanvas
+      //         .toDataURL("image/png")
+      //         .replace("image/png", "image/octet-stream" ),
+      // );
       console.log(printCanvas.src)
-      link.click();
+      //link.click();
       let image_data = printCanvas.toDataURL("image/png");
       console.log(image_data);
       if(this.currentView === 1) {

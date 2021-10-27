@@ -13,7 +13,6 @@
             this.init();
         },
         components: {
-            ChipFileUpload
         },
         data: () => ({
             chipInstructionFiles: []

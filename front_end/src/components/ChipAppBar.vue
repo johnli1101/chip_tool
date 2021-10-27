@@ -19,8 +19,9 @@
                     <v-tab>Back</v-tab>
                 </v-tabs>
             </v-row> -->
-            <ChipFinalExport />
-            <ChipShowEditor @show-painterro="showPainterro()" />
+            
+            <ChipFinalExport v-if="showFinalEdit" />
+            <ChipShowEditor v-if="showFinalEdit" @show-painterro="showPainterro()" />
             <ChipExportButton @show-painterro="showPainterro($event)"/>
     </v-app-bar>
 </template>
@@ -75,6 +76,9 @@
             chipImageSize() {
                 return this.$store.state.chipImageSize;
             },
+            showFinalEdit() {
+                return this.$store.state.showFinalEdit;
+            }
         },
         data: () => ({
             painterro: null,
@@ -90,8 +94,9 @@
                                 const type = 'image/png';
                                 const file = new File([image.asBlob(type)], filename,  {type: type});
                                 
-                                this.uploadImageToFileSystem(file);
-                                this.$store.dispatch('changeCurrentEditImage', "http://" + this.localHostName + "/chip_images/final/" + filename)
+                                let newFilename = this.uploadImageToFileSystem(file);
+                                console.log(newFilename)
+                                this.$store.dispatch('changeCurrentEditImage', "http://" + this.databaseLocalHost + "/static/final/" + filename)
                                 this.downloadImage(file, filename)
                                 done(true);
                             },

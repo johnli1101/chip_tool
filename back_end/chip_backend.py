@@ -1,12 +1,10 @@
 import flask
 from flask import request, jsonify, send_file, send_from_directory, url_for
-from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
 import urllib.request
 import ntpath
 from pathlib import Path
 import json
-import time
 import io
 from io import BytesIO
 import base64
@@ -106,13 +104,15 @@ def api_upload_image_final():
     print(folder);
 
     filename = secure_filename(file.filename)
-    filepath = app.config['UPLOAD_FOLDER'] + str(folder) + "/" + str(filename)
+    # filepath = app.config['UPLOAD_FOLDER'] + str(folder) + "/" + str(filename)
+    filepath = app.config['UPLOAD_FOLDER3'] + "final/" + str(filename);
 
     #check if file exists if not then upload the image
     # my_file = Path(filepath)
     # print(my_file)
     # if not my_file.is_file():
-    file.save(os.path.join(app.config['UPLOAD_FOLDER'] + "/" + folder, filename))
+    # file.save(os.path.join(app.config['UPLOAD_FOLDER'] + "/" + folder, filename))
+    file.save(os.path.join(app.config['UPLOAD_FOLDER3'] + "final/", filename))
 
     return filepath
 
@@ -122,13 +122,13 @@ def api_create_final_export():
     request_data = request.get_json()
     print(request_data);
 
-    user_drawing=Image.open(app.config['UPLOAD_FOLDER'] + "/final/file.png")
-    chip_background=Image.open(app.config['UPLOAD_FOLDER'] + "/exported/exported_image.png")
+    user_drawing=Image.open(app.config['UPLOAD_FOLDER3'] + "/final/file.png")
+    chip_background=Image.open(app.config['UPLOAD_FOLDER3'] + "/export/exported_image.png")
     filename=request_data['filename'] + ".png"
 
     user_drawing.convert('RGBA')
     chip_background.paste(user_drawing, (0, 0), user_drawing)
-    chip_background.save(app.config['UPLOAD_FOLDER'] + "/final_export/" + filename, quality=95)
+    chip_background.save(app.config['UPLOAD_FOLDER3'] + "/final_export/" + filename, quality=95)
 
 
 
@@ -207,9 +207,11 @@ def api_create_export():
 
     #created file name and save it in the path
     filename = "exported_image.png"
-    filepath = app.config['UPLOAD_FOLDER'] + "exported/" + str(filename)
+    #filepath = app.config['UPLOAD_FOLDER'] + "exported/" + str(filename)
+    filepath = app.config['UPLOAD_FOLDER3'] + "export/" + str(filename);
     print(filepath)
-    imgBlank.save(os.path.join(app.config['UPLOAD_FOLDER']  + "exported/", filename))
+    #imgBlank.save(os.path.join(app.config['UPLOAD_FOLDER']  + "exported/", filename))
+    imgBlank.save(os.path.join(app.config['UPLOAD_FOLDER3']  + "export/", filename))
 
     payload = {}
 

@@ -22,6 +22,7 @@ export default new Vuex.Store({
         ,chipFrontPaintImageUrl: ""
         ,chipBackPaintImageUrl: ""
         ,chipBackUrlAdj: ""
+        ,showFinalEdit: false
         ,chipFrontSize: [0, 0]                  //size of image of chip instruction
         ,currentEditImage: ""                   //edit of final image
         ,mapBounds: [0, 0]
@@ -66,6 +67,9 @@ export default new Vuex.Store({
         },
         changeShowPaintTool(state, mode) {
             state.showPaintTool = mode;
+        },
+        changeShowFinalEdit(state, mode) {
+            state.showFinalEdit = mode;
         },
         // ----- changing chip mutations ----
         changeChipInstructionUrls(state, filePaths) {
@@ -158,6 +162,9 @@ export default new Vuex.Store({
         },
         changeShowPaintTool(context, mode) {
             context.commit('changeShowPaintTool', mode);
+        },
+        changeShowFinalEdit(context, mode) {
+            context.commit('changeShowFinalEdit', mode);
         },
         // ------  changing chip data ------
         //NOTE: this takes in an array for filepaths
